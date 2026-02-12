@@ -11,6 +11,8 @@ asyncpg = "*"
 alembic = "*"
 alembic-postgresql-enum = "*"
 pydantic-settings = "*"
+ollama = "*"
+pgvector = "*"
 
 [dev-packages]
 

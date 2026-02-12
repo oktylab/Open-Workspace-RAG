@@ -1,12 +1,63 @@
 services:
   db:
-    image: postgres:15
+    image: pgvector/pgvector:pg17
     container_name: db
     env_file: .env
     ports:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  model-init:
+    image: ollama/ollama:latest
+    container_name: model-init
+    tty: true
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: /bin/sh
+    command: 
+      - "-c"
+      - |
+        echo "Pulling Qwen2.5 1.5B (approx 1.1GB)..."
+        ollama pull qwen2.5:1.5b
+        echo "Pulling Nomic Embed Text (approx 275MB)..."
+        ollama pull nomic-embed-text
+        echo "Models downloaded successfully."
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - open_webui_data:/app/backend/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+      model-init:
+        condition: service_completed_successfully
 
   api:
     build: .
@@ -18,7 +69,14 @@ services:
     volumes:
       - .:/code
     depends_on:
-      - db
+      db:
+        condition: service_started
+      ollama:
+        condition: service_healthy
+      model-init:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
+  ollama_data:
+  open_webui_data:
