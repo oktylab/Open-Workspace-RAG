@@ -114,22 +114,6 @@ services:
 
   ########################################################################################
   ########################################################################################
-  taskiq-dashboard:
-    image: ghcr.io/danfimov/taskiq-dashboard:latest
-    container_name: taskiq_dashboard
-    ports:
-      - "8081:8000"
-    environment:
-      - TASKIQ_DASHBOARD__STORAGE_TYPE=sqlite
-      - TASKIQ_DASHBOARD__SQLITE__DSN=sqlite+aiosqlite:///data/taskiq_dashboard.db
-      - TASKIQ_DASHBOARD__API__TOKEN=supersecret
-    volumes:
-      - taskiq_dashboard_data:/data
-    depends_on:
-      - redis
-
-  ########################################################################################
-  ########################################################################################
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
@@ -145,9 +129,22 @@ services:
       ollama:
         condition: service_healthy
 
+  ########################################################################################
+  ########################################################################################
+  # redis-insight:
+  #   image: redis/redisinsight:latest
+  #   container_name: redis-insight
+  #   restart: always
+  #   ports:
+  #     - "5541:5540"
+  #   volumes:
+  #     - redis_insight_data:/data
+  #   depends_on:
+  #     - redis
+
 volumes:
   postgres_data:
   redis_data:
   ollama_data:
   open_webui_data:
-  taskiq_dashboard_data:
+  # redis_insight_data:

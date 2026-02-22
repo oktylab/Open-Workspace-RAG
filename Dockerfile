@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED 1
 
 
 RUN apt-get update 
-RUN apt-get install -y git build-essential gcc
+RUN apt-get install -y git build-essential gcc ca-certificates
+RUN update-ca-certificates
 
 RUN pip install --no-cache-dir pipenv
 

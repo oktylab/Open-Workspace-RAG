@@ -10,6 +10,7 @@ def get_embedding_model():
         os.makedirs(cache_path, exist_ok=True)
         
         _model = TextEmbedding(
+            # model_name="intfloat/multilingual-e5-large",
             model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             cache_dir=cache_path
         )

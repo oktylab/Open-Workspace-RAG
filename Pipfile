@@ -17,11 +17,13 @@ fastembed = "*"
 httpx = "*"
 selectolax = "*"
 langdetect = "*"
-taskiq = {version = "*", extras = ["reload"]}
+taskiq = "*"
 taskiq-redis = "*"
 taskiq-fastapi = "*"
 redis = "*"
-taskiq-dashboard = "*"
+trafilatura = "*"
+certifi = "*"
+crawlee = {extras = ["beautifulsoup"], version = "*"}
 
 [dev-packages]
 
