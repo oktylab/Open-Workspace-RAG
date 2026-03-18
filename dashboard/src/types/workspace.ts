@@ -4,6 +4,8 @@ export interface Workspace {
   name: string;
   url: string;
   slug: string;
+  api_key: string;
+  allowed_origins: string[];
   tags: string[];
 }
 
@@ -17,4 +19,6 @@ export interface WorkspaceUpdate {
   name?: string;
   url?: string;
   slug?: string;
+  allowed_origins?: string[];
+  regenerate_api_key?: boolean;
 }

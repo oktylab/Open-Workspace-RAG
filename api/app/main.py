@@ -1,13 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.settings import settings
-from app.api.router import router
+from app.api.router import admin_router, public_router
 import uvicorn
 
+# ==========================================
+# ==========================================
 app = FastAPI(
+    title="Admin API",
     openapi_url=f"{settings.API_PREFIX}/openapi.json"
 )
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -19,13 +21,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=router, prefix=settings.API_PREFIX)
+app.include_router(router=admin_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 def health_check():
-    return {"status": "API is healthy"}
+    return {"status": "Admin API is healthy"}
 
 
+# ==========================================
+# ==========================================
+public_app = FastAPI(
+    title="Public API",
+    openapi_url=f"{settings.API_PREFIX}/openapi.json"
+)
+
+public_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+public_app.include_router(router=public_router)
+app.mount(settings.API_PREFIX, public_app)
+
+
+# ==========================================
+# ==========================================
 if __name__ == "__main__":    
     uvicorn.run(
         "app.main:app", 

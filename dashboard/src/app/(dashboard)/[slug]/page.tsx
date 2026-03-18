@@ -1,4 +1,3 @@
-// src/app/(dashboard)/[slug]/settings/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
@@ -14,11 +13,9 @@ export default function WorkspaceSettingsPage() {
   if (isLoading || !workspace) return null;
 
   return (
-    <div className="flex flex-col gap-12 w-full pb-12 max-w-3xl">
+    <div className="flex flex-col gap-6 w-full max-w-3xl">
       <WorkspaceSettingsForm workspace={workspace} />
-      <div className="border-t border-border pt-10">
-        <DangerZone slug={workspace.slug} />
-      </div>
+      <DangerZone slug={workspace.slug} />
     </div>
   );
 }

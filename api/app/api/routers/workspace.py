@@ -8,6 +8,7 @@ from app.schemas.workspace import (
     WorkspaceResponse, 
     WorkspaceUpdate,
 )
+from app.core.security import generate_workspace_api_key
 
 router = APIRouter()
 
@@ -84,6 +85,12 @@ async def update_workspace(
         db_workspace.name = data.name
     if data.url:
         db_workspace.url = str(data.url)
+    
+    if data.allowed_origins : 
+        db_workspace.allowed_origins = data.allowed_origins
+    
+    if data.regenerate_api_key : 
+        db_workspace.api_key = generate_workspace_api_key()
 
     await workspace_repo.db.commit()
     return db_workspace

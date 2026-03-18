@@ -1,7 +1,7 @@
 import uuid, json
 from typing import List, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, text
+from sqlalchemy import select, text, func
 from app.models.workspace import Workspace
 from app.repositories.base_repository import BaseRepository
 
@@ -39,12 +39,20 @@ class WorkspaceRepository(BaseRepository[Workspace]):
 
         result = await self.db.execute(
             select(self.model).where(
-                self.model.slug == slug,
+                func.lower(self.model.slug) == slug.lower().strip(),
                 self.model.organization_id == organization_id
             )
         )
         return result.scalar_one_or_none()
 
+
+    #############################################################################
+    #############################################################################
+    async def get_by_api_key(self, api_key: str) -> Optional[Workspace]:
+        result = await self.db.execute(
+            select(self.model).where(self.model.api_key == api_key)
+        )
+        return result.scalar_one_or_none()
     #############################################################################
     #############################################################################
     async def get_all_by_org(

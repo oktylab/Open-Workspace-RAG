@@ -1,8 +1,11 @@
 import hashlib
-from typing import List
+from typing import List, Dict, Any
 from langdetect import detect
 from app.schemas.enums import LanguageEnum
 from crawl4ai.chunking_strategy import SlidingWindowChunking
+from flashrank import RerankRequest
+from app.core.ranker import get_ranker
+
 
 ################################################################################
 ################################################################################
@@ -34,3 +37,19 @@ def chunk_text(text: str, window_size: int = 400, overlap: int = 50) -> List[str
     )
     
     return chunker.chunk(text)
+
+
+################################################################################
+################################################################################
+def rerank_texts(
+    query: str, 
+    texts: List[str]
+) -> List[dict]:
+    if not texts:
+        return []
+        
+    ranker = get_ranker()
+    passages = [{"id": i, "text": text} for i, text in enumerate(texts)]
+    
+    request = RerankRequest(query=query, passages=passages)
+    return ranker.rerank(request)

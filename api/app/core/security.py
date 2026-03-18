@@ -1,4 +1,4 @@
-import bcrypt, jwt
+import bcrypt, jwt, secrets as secrets_module
 from datetime import datetime, timedelta, timezone
 from app.core.secrets import secrets
 from app.core.settings import settings
@@ -40,3 +40,11 @@ def decode_access_token(token: str) -> str | None:
         return payload.get("sub")
     except jwt.InvalidTokenError:
         return None
+    
+
+
+#################################################################################
+#################################################################################
+def generate_workspace_api_key() -> str:
+    random_str = secrets_module.token_urlsafe(32)
+    return f"pk_ws_{random_str}"
