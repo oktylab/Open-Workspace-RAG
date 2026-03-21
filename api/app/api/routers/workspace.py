@@ -43,7 +43,8 @@ async def create_workspace(
         organization_id=db_org.id,
         slug=data.slug,
         name=data.name,
-        url=str(data.url)
+        url=str(data.url),
+        allowed_origins=data.allowed_origins
     )
     await workspace_repo.db.commit()
     

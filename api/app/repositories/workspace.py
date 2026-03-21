@@ -13,18 +13,20 @@ class WorkspaceRepository(BaseRepository[Workspace]):
     #############################################################################
     #############################################################################
     def create(
-        self, 
-        organization_id: uuid.UUID, 
-        slug: str, 
-        name: str, 
-        url: str
+        self,
+        organization_id: uuid.UUID,
+        slug: str,
+        name: str,
+        url: str,
+        allowed_origins: List[str] = []
     ) -> Workspace:
 
         workspace = Workspace(
-            organization_id=organization_id, 
-            slug=slug, 
-            name=name, 
-            url=url
+            organization_id=organization_id,
+            slug=slug,
+            name=name,
+            url=url,
+            allowed_origins=allowed_origins
         )
         self.db.add(workspace)
         return workspace

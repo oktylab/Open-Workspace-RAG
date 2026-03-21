@@ -86,7 +86,7 @@ export function Chat() {
         >
           {/* Chat panel */}
           <ResizablePanel
-            defaultSize={isMobile ? 60 : 60}
+            defaultSize={isMobile ? 50 : 50}
             minSize={isMobile ? 40 : 30}
           >
             <div className='flex h-full flex-col overflow-hidden'>
@@ -103,7 +103,7 @@ export function Chat() {
 
           {/* Debug panel */}
           <ResizablePanel
-            defaultSize={isMobile ? 40 : 40}
+            defaultSize={isMobile ? 50 : 50}
             minSize={isMobile ? 20 : 20}
           >
             <div className='flex h-full flex-col'>

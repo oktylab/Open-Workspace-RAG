@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router'
 import {
   ChevronsUpDown,
   LogOut,
-  Settings,
   Building2,
   Palette,
   Globe,
