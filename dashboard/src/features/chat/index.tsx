@@ -32,10 +32,17 @@ export function Chat() {
     sessionId,
     sendMessage,
     loadMoreHistory,
+    clearMessages,
+    resetSession,
   } = useChat(apiKey)
 
   const handleSend = (query: string) => {
     void sendMessage(query, [])
+  }
+
+  const handleReset = () => {
+    clearMessages()
+    resetSession()
   }
 
   if (!apiKey) {
@@ -106,7 +113,7 @@ export function Chat() {
                 sessionId={sessionId}
                 apiKey={apiKey}
               />
-              <ChatInput onSend={handleSend} disabled={isStreaming} />
+              <ChatInput onSend={handleSend} onReset={handleReset} disabled={isStreaming} />
             </div>
           </ResizablePanel>
 
