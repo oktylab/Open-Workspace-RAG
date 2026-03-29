@@ -25,6 +25,23 @@ services:
 
   ########################################################################################
   ########################################################################################
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: seaweedfs
+    command: server -s3 -dir=/data -ip.bind=0.0.0.0
+    env_file: .env
+    ports:
+      - "9333:9333"   # Master UI
+      - "9340:9340"   # Volume Server
+      - "8888:8888"   # Filer UI
+      - "8333:8333"   # S3 Endpoint
+      - "7333:7333"   # WebDAV
+      - "23646:23646" # Admin UI
+    volumes:
+      - seaweedfs_data:/data
+
+  ########################################################################################
+  ########################################################################################
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
@@ -132,23 +149,6 @@ services:
   #   depends_on:
   #     ollama:
   #       condition: service_healthy
-
-  ########################################################################################
-  ########################################################################################
-  seaweedfs:
-    image: chrislusf/seaweedfs:latest
-    container_name: seaweedfs
-    command: server -s3 -dir=/data -ip.bind=0.0.0.0
-    env_file: .env
-    ports:
-      - "9333:9333"   # Master UI
-      - "9340:9340"   # Volume Server
-      - "8888:8888"   # Filer UI
-      - "8333:8333"   # S3 Endpoint
-      - "7333:7333"   # WebDAV
-      - "23646:23646" # Admin UI
-    volumes:
-      - seaweedfs_data:/data
 
   ########################################################################################
   ########################################################################################

@@ -1,6 +1,9 @@
 export interface TagNode {
+  id?: string
   name: string
   fullPath: string
+  label: string
+  description?: string | null
   children: TagNode[]
   parent?: string
 }

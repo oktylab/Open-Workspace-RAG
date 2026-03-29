@@ -1,5 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
+import { Globe, FileText } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { jobStatuses } from '../data/data'
 import type { Job } from '../data/schema'
@@ -31,42 +33,59 @@ export const jobsColumns: ColumnDef<Job>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'id',
+    id: 'type',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='ID' />
+      <DataTableColumnHeader column={column} title='Type' />
     ),
-    cell: ({ row }) => (
-      <div className='w-[100px] truncate font-mono text-xs'>
-        {row.getValue('id')}
-      </div>
-    ),
+    meta: { className: 'w-[80px]' },
+    cell: ({ row }) => {
+      const type = row.original.config?.type
+      if (!type) return <span className='text-muted-foreground text-xs'>—</span>
+      return (
+        <Badge variant='outline' className='gap-1 text-xs font-normal'>
+          {type === 'url'
+            ? <Globe className='h-3 w-3' />
+            : <FileText className='h-3 w-3' />}
+          {type === 'url' ? 'URL' : 'PDF'}
+        </Badge>
+      )
+    },
     enableSorting: false,
-    enableHiding: false,
   },
   {
-    accessorKey: 'config.url',
+    id: 'source',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='URL' />
+      <DataTableColumnHeader column={column} title='Source' />
     ),
     meta: {
-      className: 'ps-1 w-1/2 max-w-[250px]',
+      className: 'ps-1 w-1/2 max-w-[300px]',
       tdClassName: 'ps-4',
     },
     cell: ({ row }) => {
-      const url = row.original.config?.url
-      if (!url) return <span className='text-muted-foreground'>—</span>
+      const config = row.original.config
+      if (!config) return <span className='text-muted-foreground'>—</span>
+
+      if (config.type === 'url') {
+        return (
+          <a
+            href={config.url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='block truncate font-medium hover:underline'
+            onClick={(e) => e.stopPropagation()}
+          >
+            {config.url}
+          </a>
+        )
+      }
+
       return (
-        <a
-          href={url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='block truncate font-medium hover:underline'
-          onClick={(e) => e.stopPropagation()}
-        >
-          {url}
-        </a>
+        <span className='text-sm text-muted-foreground'>
+          {config.storage_keys.length} file{config.storage_keys.length !== 1 ? 's' : ''}
+        </span>
       )
     },
+    enableSorting: false,
   },
   {
     accessorKey: 'status',
@@ -97,7 +116,8 @@ export const jobsColumns: ColumnDef<Job>[] = [
       const date = new Date(row.getValue('created_at'))
       return (
         <div className='w-[140px] text-sm'>
-          {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {date.toLocaleDateString()}{' '}
+          {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
       )
     },

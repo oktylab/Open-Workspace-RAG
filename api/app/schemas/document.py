@@ -22,6 +22,7 @@ class DocumentResponse(BaseModel):
     url: str
     title: Optional[str] = None
     lang: LanguageEnum
+    tag_id: Optional[UUID] = None
     tag: Optional[str] = None
     suggestions: List[DocumentSuggestion] = []
     created_at: datetime
@@ -30,9 +31,14 @@ class DocumentResponse(BaseModel):
 
     @field_validator("tag", mode="before")
     @classmethod
-    def transform_ltree_to_str(cls, v):
+    def transform_tag_to_str(cls, v):
         if v is None:
             return None
+        if isinstance(v, str):
+            return v
+        # Tag relationship object
+        if hasattr(v, "path"):
+            return str(v.path)
         return str(v)
 
 
@@ -40,6 +46,14 @@ class DocumentResponse(BaseModel):
 #############################################################################
 class DocumentResponseWithChunks(DocumentResponse):
     chunks: List[ChunkResponse]
+
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
+class DocumentUpdate(BaseModel):
+    title: Optional[str] = None
+    tag_id: Optional[UUID] = None
 
 #############################################################################
 #############################################################################

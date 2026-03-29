@@ -39,8 +39,14 @@ export function JobsDeleteDialog() {
       desc={
         <>
           You are about to delete the job for{' '}
-          <strong>{currentRow.config?.url ?? currentRow.id}</strong>. This action
-          cannot be undone.
+          <strong>
+            {currentRow.config?.type === 'url'
+              ? currentRow.config.url
+              : currentRow.config?.type === 'pdf'
+                ? `${currentRow.config.storage_keys.length} PDF file(s)`
+                : currentRow.id}
+          </strong>
+          . This action cannot be undone.
         </>
       }
       confirmText='Delete'

@@ -20,6 +20,18 @@ export function useDocument(documentId: string) {
   })
 }
 
+export function useUpdateDocument(documentId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: { title?: string | null; tag_id?: string | null }) =>
+      documentsApi.update(documentId, payload),
+    onSuccess: (updated) => {
+      queryClient.setQueryData([...DOCUMENTS_QUERY_KEY, documentId], updated)
+      void queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY })
+    },
+  })
+}
+
 export function useDeleteDocuments() {
   const queryClient = useQueryClient()
   return useMutation({

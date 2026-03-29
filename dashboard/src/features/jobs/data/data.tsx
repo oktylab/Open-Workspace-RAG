@@ -7,6 +7,8 @@ import {
   Cpu,
   Filter,
   LayoutTemplate,
+  Globe,
+  FileText,
 } from 'lucide-react'
 import type { JobStatusValue } from './schema'
 
@@ -76,4 +78,13 @@ export const languages: {
   { label: 'Arabic', value: 'AR' },
   { label: 'French', value: 'FR' },
   { label: 'English', value: 'EN' },
+]
+
+export const jobTypes: {
+  label: string
+  value: 'url' | 'pdf'
+  icon: React.ComponentType<{ className?: string }>
+}[] = [
+  { label: 'URL', value: 'url', icon: Globe },
+  { label: 'PDF', value: 'pdf', icon: FileText },
 ]

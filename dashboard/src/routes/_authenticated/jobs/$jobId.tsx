@@ -11,7 +11,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useJob, useRunJobs, useJobProgress } from '@/features/jobs/hooks'
 import { jobStatuses } from '@/features/jobs/data/data'
-import type { Job } from '@/features/jobs/data/schema'
+import type { Job, AnyJobConfig, AnyJobResult } from '@/features/jobs/data/schema'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -161,7 +161,11 @@ function JobDetail() {
             <div>
               <div className='flex items-center gap-3'>
                 <h1 className='text-2xl font-bold tracking-tight md:text-3xl truncate max-w-[300px] md:max-w-md lg:max-w-xl'>
-                  {job.config?.url ?? 'Job'}
+                  {job.config?.type === 'url'
+                    ? job.config.url
+                    : job.config?.type === 'pdf'
+                      ? `${job.config.storage_keys.length} file(s)`
+                      : 'Job'}
                 </h1>
                 {statusInfo && (
                   <Badge variant='outline' className='gap-1 h-6'>
@@ -258,8 +262,10 @@ function JobDetail() {
                       <div className='flex flex-col items-center justify-center py-12 text-center rounded-lg border border-dashed'>
                         <Loader2 className='mx-auto h-8 w-8 animate-spin text-muted-foreground mb-4' />
                         <p className='text-sm text-muted-foreground'>
-                          {job.status === 'PENDING' 
-                            ? 'Job is pending and will start crawling shortly.' 
+                          {job.status === 'PENDING'
+                            ? job.config?.type === 'pdf'
+                              ? 'Job is pending and will start extracting shortly.'
+                              : 'Job is pending and will start crawling shortly.'
                             : 'Job is currently running. Results will appear here when complete.'}
                         </p>
                       </div>
@@ -273,12 +279,7 @@ function JobDetail() {
                           <DataRow label="Created" value={new Date(job.created_at).toLocaleString()} />
                           <DataRow label="Updated" value={new Date(job.updated_at).toLocaleString()} />
                           {job.result && (
-                            <>
-                              <DataRow label="Total Pages" value={job.result.summary.total.toString()} />
-                              <DataRow label="Succeeded" value={job.result.summary.succeeded.toString()} />
-                              <DataRow label="Failed" value={job.result.summary.failed.toString()} />
-                              <DataRow label="Skipped" value={job.result.summary.skipped.toString()} />
-                            </>
+                            <JobResultSummaryRows result={job.result} />
                           )}
                         </div>
                       </div>
@@ -290,30 +291,7 @@ function JobDetail() {
               )}
               
               {activeTab === 'errors' && (
-                <JobContentSection title='Errors & Skipped Pages' desc='Detailed view of failed and skipped pages'>
-                  {job.result ? (
-                    <Tabs defaultValue='failed' className='w-full'>
-                      <TabsList>
-                        <TabsTrigger value='failed'>
-                          Failed ({job.result.failed.length})
-                        </TabsTrigger>
-                        <TabsTrigger value='skipped'>
-                          Skipped ({job.result.skipped.length})
-                        </TabsTrigger>
-                      </TabsList>
-                      <TabsContent value='failed' className='mt-6'>
-                        <PageResultsList pages={job.result.failed} type='error' />
-                      </TabsContent>
-                      <TabsContent value='skipped' className='mt-6'>
-                        <PageResultsList pages={job.result.skipped} type='skipped' />
-                      </TabsContent>
-                    </Tabs>
-                  ) : (
-                    <div className='text-center py-12 text-sm text-muted-foreground'>
-                      No results available yet.
-                    </div>
-                  )}
-                </JobContentSection>
+                <JobResultErrorsSection result={job.result ?? null} />
               )}
             </div>
           </div>
@@ -385,53 +363,131 @@ function PageResultsList({
   )
 }
 
-function JobConfigDisplay({ config }: { config: Job['config'] }) {
+function JobConfigDisplay({ config }: { config: AnyJobConfig | null | undefined }) {
   if (!config) return null
-  
+
   return (
     <div>
       <h4 className='text-sm font-medium mb-3 text-muted-foreground'>Configuration</h4>
       <div className='rounded-md border bg-card'>
         <div className='px-4'>
-          <DataRow 
-            label="Source URL" 
-            value={<code className="bg-muted px-1.5 py-0.5 rounded font-mono text-xs">{config.url}</code>} 
-          />
-
-          {config.crawling && (
+          {config.type === 'url' && (
             <>
-              <DataRow label="Max Depth" value={config.crawling.max_depth.toString()} />
-              <DataRow label="Max Pages" value={config.crawling.max_pages.toString()} />
-              <DataRow label="URL Filters" value={`${config.crawling.filters.length} rules`} />
+              <DataRow
+                label="Source URL"
+                value={<code className="bg-muted px-1.5 py-0.5 rounded font-mono text-xs">{config.url}</code>}
+              />
+              {config.crawling && (
+                <>
+                  <DataRow label="Max Depth" value={config.crawling.max_depth.toString()} />
+                  <DataRow label="Max Pages" value={config.crawling.max_pages.toString()} />
+                  <DataRow label="URL Filters" value={`${config.crawling.filters.length} rules`} />
+                </>
+              )}
+              {config.filtering && (
+                <>
+                  <DataRow label="Min Word Count" value={config.filtering.word_count_threshold.toString()} />
+                  <DataRow label="Languages Allowed" value={config.filtering.languages?.join(', ') ?? 'All'} />
+                </>
+              )}
+              {config.formating && (
+                <>
+                  <DataRow
+                    label="Relevance Query"
+                    value={config.formating.user_query ? `"${config.formating.user_query}"` : 'None'}
+                  />
+                  <DataRow
+                    label="Relevance Threshold"
+                    value={`${(config.formating.threshold * 100).toFixed(0)}% (${config.formating.threshold_type})`}
+                  />
+                  <DataRow label="Formatting Min Words" value={config.formating.min_word_threshold.toString()} />
+                  <DataRow label="Ignore Links" value={config.formating.ignore_links ? 'Yes' : 'No'} />
+                  <DataRow label="Ignore Images" value={config.formating.ignore_images ? 'Yes' : 'No'} />
+                  <DataRow label="Skip Internal Links" value={config.formating.skip_internal_links ? 'Yes' : 'No'} />
+                  <DataRow label="Excluded Tags" value={`${config.formating.excluded_tags.length} tags`} />
+                </>
+              )}
             </>
           )}
 
-          {config.filtering && (
+          {config.type === 'pdf' && (
             <>
-              <DataRow label="Min Word Count" value={config.filtering.word_count_threshold.toString()} />
-              <DataRow label="Languages Allowed" value={config.filtering.languages?.join(', ') ?? 'All'} />
-            </>
-          )}
-
-          {config.formating && (
-            <>
-              <DataRow 
-                label="Relevance Query" 
-                value={config.formating.user_query ? `"${config.formating.user_query}"` : 'None'} 
-              />
-              <DataRow 
-                label="Relevance Threshold" 
-                value={`${(config.formating.threshold * 100).toFixed(0)}% (${config.formating.threshold_type})`} 
-              />
-              <DataRow label="Formatting Min Words" value={config.formating.min_word_threshold.toString()} />
-              <DataRow label="Ignore Links" value={config.formating.ignore_links ? 'Yes' : 'No'} />
-              <DataRow label="Ignore Images" value={config.formating.ignore_images ? 'Yes' : 'No'} />
-              <DataRow label="Skip Internal Links" value={config.formating.skip_internal_links ? 'Yes' : 'No'} />
-              <DataRow label="Excluded Tags" value={`${config.formating.excluded_tags.length} tags`} />
+              <DataRow label="Bucket" value={<code className="bg-muted px-1.5 py-0.5 rounded font-mono text-xs">{config.bucket}</code>} />
+              <DataRow label="Files" value={config.storage_keys.length.toString()} />
+              {config.storage_keys.map((key) => (
+                <DataRow key={key} label="" value={<code className="bg-muted px-1.5 py-0.5 rounded font-mono text-xs break-all">{key}</code>} />
+              ))}
             </>
           )}
         </div>
       </div>
     </div>
+  )
+}
+
+function JobResultSummaryRows({ result }: { result: AnyJobResult }) {
+  const { summary } = result
+  const isUrl = result.type === 'url'
+  return (
+    <>
+      <DataRow label={isUrl ? 'Total Pages' : 'Total Files'} value={summary.total.toString()} />
+      <DataRow label="Succeeded" value={summary.succeeded.toString()} />
+      <DataRow label="Failed" value={summary.failed.toString()} />
+      <DataRow label="Skipped" value={summary.skipped.toString()} />
+    </>
+  )
+}
+
+function JobResultErrorsSection({ result }: { result: AnyJobResult | null }) {
+  if (!result) {
+    return (
+      <JobContentSection title='Errors & Skipped' desc='Detailed view of failed and skipped items'>
+        <div className='text-center py-12 text-sm text-muted-foreground'>
+          No results available yet.
+        </div>
+      </JobContentSection>
+    )
+  }
+
+  if (result.type === 'url') {
+    return (
+      <JobContentSection title='Errors & Skipped Pages' desc='Detailed view of failed and skipped pages'>
+        <Tabs defaultValue='failed' className='w-full'>
+          <TabsList>
+            <TabsTrigger value='failed'>Failed ({result.failed.length})</TabsTrigger>
+            <TabsTrigger value='skipped'>Skipped ({result.skipped.length})</TabsTrigger>
+          </TabsList>
+          <TabsContent value='failed' className='mt-6'>
+            <PageResultsList pages={result.failed} type='error' />
+          </TabsContent>
+          <TabsContent value='skipped' className='mt-6'>
+            <PageResultsList pages={result.skipped} type='skipped' />
+          </TabsContent>
+        </Tabs>
+      </JobContentSection>
+    )
+  }
+
+  const failedFiles = result.files.filter((f) => f.error)
+  return (
+    <JobContentSection title='Errors' desc='Files that failed to process'>
+      {failedFiles.length === 0 ? (
+        <div className='text-center py-8 text-sm text-muted-foreground border rounded-md border-dashed'>
+          No failed files
+        </div>
+      ) : (
+        <div className='space-y-4'>
+          {failedFiles.map((f, i) => (
+            <div key={i} className='flex flex-col space-y-1 border-b pb-4 last:border-0'>
+              <span className='text-sm font-medium'>{f.filename}</span>
+              <code className='text-xs text-muted-foreground break-all'>{f.key}</code>
+              <div className='rounded-md bg-destructive/10 p-3 mt-1'>
+                <p className='text-xs font-mono text-destructive break-words whitespace-pre-wrap'>{f.error}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </JobContentSection>
   )
 }

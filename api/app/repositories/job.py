@@ -4,8 +4,8 @@ from sqlalchemy import select, func
 from app.repositories.base_repository import BaseRepository
 from app.models.job import Job
 from app.schemas.enums import JobStatus
-from typing import List, Optional
-from app.schemas.job import JobConfig
+from typing import List, Optional, Union
+from app.schemas.job_params import URLJobConfig, PDFJobConfig
 from sqlalchemy import delete
 
 class JobRepository(BaseRepository[Job]):
@@ -17,8 +17,8 @@ class JobRepository(BaseRepository[Job]):
     ##################################################################
     def create(
         self, 
-        workspace_id: uuid.UUID, 
-        config: JobConfig, 
+        workspace_id: uuid.UUID,
+        config: Union[URLJobConfig, PDFJobConfig],
         status: JobStatus = JobStatus.PENDING
     ) -> Job:
 

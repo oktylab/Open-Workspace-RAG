@@ -2,6 +2,7 @@ export type { TagNode, SelectionMode, TagSelection } from './types'
 
 export {
   buildTagTree,
+  buildTagTreeFromObjects,
   getAllDescendants,
   findNode,
   flattenTree,

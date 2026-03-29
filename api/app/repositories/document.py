@@ -52,7 +52,7 @@ class DocumentRepository(BaseRepository[Document]):
                 self.model.workspace_id == workspace_id,
                 self.model.id == document_id
             )
-            .options(selectinload(self.model.chunks))
+            .options(selectinload(self.model.chunks), selectinload(self.model.tag))
         )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
@@ -115,7 +115,7 @@ class DocumentRepository(BaseRepository[Document]):
 
         # 4. Final paginated items statement
         stmt = (
-            stmt.options(selectinload(self.model.chunks))
+            stmt.options(selectinload(self.model.chunks), selectinload(self.model.tag))
             .order_by(self.model.created_at.desc(), self.model.id.desc())
             .offset(skip)
             .limit(limit)
@@ -138,7 +138,7 @@ class DocumentRepository(BaseRepository[Document]):
         action: JobDocumentAction = JobDocumentAction.CREATED,
         is_approved: bool = True,
         title: Optional[str] = None,
-        tag: Optional[str] = None,
+        tag_id: Optional[uuid.UUID] = None,
     ) -> Document:
 
         db_document = self.model(
@@ -148,7 +148,7 @@ class DocumentRepository(BaseRepository[Document]):
             lang=lang,
             content_hash=content_hash,
             is_approved=is_approved,
-            tag=tag,
+            tag_id=tag_id,
         )
 
         if job_id:
@@ -187,7 +187,7 @@ class DocumentRepository(BaseRepository[Document]):
                 title=title,
                 lang=lang,
                 content_hash=content_hash,
-                tag=None,
+                tag_id=None,
                 is_approved=False
             )
             self.db.add(db_document)
@@ -207,84 +207,52 @@ class DocumentRepository(BaseRepository[Document]):
 
     #################################################################################
     #################################################################################
-    async def bulk_label_documents_with_debug(
+    async def bulk_label_documents(
         self,
         document_ids: List[uuid.UUID]
-    ) -> List[dict]:
+    ) -> None:
+        """
+        Auto-assign the best matching tag to each document based on
+        cosine similarity between chunk embeddings and tag embeddings.
+        """
         query = text("""
             WITH scoring AS (
                 SELECT
                     c.document_id,
-                    tag.key AS tag_path,
-                    (c.embedding <=> tag.val::text::vector) AS distance,
+                    t.id AS tag_id,
+                    t.path::text AS tag_path,
+                    (c.embedding <=> t.embedding) AS distance,
                     (0.04 + 0.025 * ln(GREATEST(length(c.content), 1))) AS threshold
                 FROM chunks c
                 JOIN documents d ON c.document_id = d.id
-                JOIN workspaces w ON d.workspace_id = w.id
-                CROSS JOIN LATERAL jsonb_each(w.tags_embeddings) AS tag(key, val)
+                JOIN tags t ON t.workspace_id = d.workspace_id
                 WHERE d.id = ANY(:document_ids)
+                  AND t.embedding IS NOT NULL
             ),
             document_best_matches AS (
                 SELECT
                     document_id,
+                    tag_id,
                     tag_path,
                     MIN(distance) AS best_distance,
                     MAX(threshold) AS calculated_threshold
                 FROM scoring
-                GROUP BY document_id, tag_path
+                GROUP BY document_id, tag_id, tag_path
             ),
             best_match AS (
                 SELECT DISTINCT ON (document_id)
                     document_id,
-                    tag_path::ltree AS best_tag
+                    tag_id
                 FROM document_best_matches
                 WHERE best_distance < calculated_threshold
                 ORDER BY document_id, best_distance ASC
-            ),
-            update_step AS (
-                UPDATE documents d
-                SET tag = m.best_tag
-                FROM best_match m
-                WHERE d.id = m.document_id
             )
-            SELECT
-                dbm.document_id,
-                dbm.tag_path,
-                ROUND(dbm.best_distance::numeric, 4) AS distance,
-                ROUND(dbm.calculated_threshold::numeric, 4) AS threshold,
-                (dbm.best_distance < dbm.calculated_threshold) AS is_match
-            FROM document_best_matches dbm
-            ORDER BY dbm.document_id, dbm.best_distance ASC;
+            UPDATE documents d
+            SET tag_id = m.tag_id
+            FROM best_match m
+            WHERE d.id = m.document_id
         """)
-        
-        result = await self.db.execute(query, {"document_ids": document_ids})
-        return [dict(row._mapping) for row in result.fetchall()]    
-    #################################################################################
-    #################################################################################
-    async def bulk_remove_tag_hierarchy(self, workspace_id: uuid.UUID, path: str):
-        query = text("""
-            UPDATE documents
-            SET tag = NULL
-            WHERE workspace_id = :workspace_id
-              AND tag <@ CAST(:path AS ltree)
-        """)
-
-        await self.db.execute(query, {"path": path, "workspace_id": workspace_id})
-
-    #################################################################################
-    #################################################################################
-    async def bulk_rename_tag_hierarchy(self, workspace_id: uuid.UUID, old_path: str, new_path: str):
-        query = text("""
-            UPDATE documents
-            SET tag = CASE
-                WHEN tag = CAST(:old AS ltree) THEN CAST(:new AS ltree)
-                ELSE CAST(:new AS ltree) || subpath(tag, nlevel(CAST(:old AS ltree)))
-            END
-            WHERE workspace_id = :workspace_id
-              AND tag <@ CAST(:old AS ltree)
-        """)
-
-        await self.db.execute(query, {"old": old_path, "new": new_path, "workspace_id": workspace_id})
+        await self.db.execute(query, {"document_ids": document_ids})
 
     #################################################################################
     #################################################################################

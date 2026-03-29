@@ -64,7 +64,7 @@ function DefaultNode({
       ) : (
         <Tag size={14} className="text-muted-foreground" />
       )}
-      <span className="text-sm font-medium">{node.name}</span>
+      <span className="text-sm font-medium">{node.label || node.name}</span>
     </div>
   )
 }

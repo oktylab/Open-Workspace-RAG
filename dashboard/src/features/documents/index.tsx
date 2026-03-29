@@ -5,7 +5,6 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { DocumentsDialogs } from './components/documents-dialogs'
-import { DocumentsPrimaryButtons } from './components/documents-primary-buttons'
 import { DocumentsTable } from './components/documents-table'
 import { useDocuments } from './hooks'
 import { getRouteApi } from '@tanstack/react-router'
@@ -37,14 +36,11 @@ export default function Documents() {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-        <div className='flex flex-wrap items-end justify-between gap-2'>
-          <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Documents</h2>
-            <p className='text-muted-foreground'>
-              Manage and view your indexed documents and their chunks.
-            </p>
-          </div>
-          <DocumentsPrimaryButtons />
+        <div>
+          <h2 className='text-2xl font-bold tracking-tight'>Documents</h2>
+          <p className='text-muted-foreground'>
+            Manage and view your indexed documents and their chunks.
+          </p>
         </div>
         {isLoading ? (
           <div className='flex flex-1 items-center justify-center'>

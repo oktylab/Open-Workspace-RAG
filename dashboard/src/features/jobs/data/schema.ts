@@ -61,13 +61,18 @@ export const formatingConfigSchema = z.object({
 })
 export type FormatingConfig = z.infer<typeof formatingConfigSchema>
 
-export const jobConfigSchema = z.object({
+// ── URL job ───────────────────────────────────────────────────────────────────
+export const urlJobConfigSchema = z.object({
+  type: z.literal('url').default('url'),
   url: z.string().url('Please enter a valid URL'),
   crawling: crawlingConfigSchema.optional(),
   filtering: filteringConfigSchema,
   formating: formatingConfigSchema,
 })
-export type JobConfigInput = z.infer<typeof jobConfigSchema>
+export type URLJobConfig = z.infer<typeof urlJobConfigSchema>
+/** Alias kept so the job-form and hooks don't need changes */
+export const jobConfigSchema = urlJobConfigSchema
+export type JobConfigInput = URLJobConfig
 
 export const jobPageResultSchema = z.object({
   url: z.string(),
@@ -85,13 +90,51 @@ export const jobSummarySchema = z.object({
 })
 export type JobSummary = z.infer<typeof jobSummarySchema>
 
-export const jobResultSchema = z.object({
+export const urlJobResultSchema = z.object({
+  type: z.literal('url'),
   failed: z.array(jobPageResultSchema),
   skipped: z.array(jobPageResultSchema),
   summary: jobSummarySchema,
 })
-export type JobResult = z.infer<typeof jobResultSchema>
+export type URLJobResult = z.infer<typeof urlJobResultSchema>
 
+// ── PDF job ───────────────────────────────────────────────────────────────────
+export const pdfJobConfigSchema = z.object({
+  type: z.literal('pdf'),
+  storage_keys: z.array(z.string()),
+  bucket: z.string(),
+})
+export type PDFJobConfig = z.infer<typeof pdfJobConfigSchema>
+
+export const pdfFileResultSchema = z.object({
+  key: z.string(),
+  filename: z.string(),
+  pages: z.number().int(),
+  error: z.string().nullable().optional(),
+})
+export type PDFFileResult = z.infer<typeof pdfFileResultSchema>
+
+export const pdfJobResultSchema = z.object({
+  type: z.literal('pdf'),
+  files: z.array(pdfFileResultSchema),
+  summary: jobSummarySchema,
+})
+export type PDFJobResult = z.infer<typeof pdfJobResultSchema>
+
+// ── Union types ───────────────────────────────────────────────────────────────
+export const anyJobConfigSchema = z.discriminatedUnion('type', [
+  urlJobConfigSchema,
+  pdfJobConfigSchema,
+])
+export type AnyJobConfig = z.infer<typeof anyJobConfigSchema>
+
+export const anyJobResultSchema = z.discriminatedUnion('type', [
+  urlJobResultSchema,
+  pdfJobResultSchema,
+])
+export type AnyJobResult = z.infer<typeof anyJobResultSchema>
+
+// ── Job entity ────────────────────────────────────────────────────────────────
 export const jobSchema = z.object({
   id: z.string().uuid(),
   task_id: z.string().nullable().optional(),
@@ -99,8 +142,8 @@ export const jobSchema = z.object({
   status: jobStatusEnum,
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
-  config: jobConfigSchema.nullable().optional(),
-  result: jobResultSchema.nullable().optional(),
+  config: anyJobConfigSchema.nullable().optional(),
+  result: anyJobResultSchema.nullable().optional(),
 })
 export type Job = z.infer<typeof jobSchema>
 

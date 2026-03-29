@@ -48,6 +48,11 @@ export const documentsApi = {
     return apiClient.delete(`/documents/${slug}`, { data: documentIds }).then((r) => r.data)
   },
 
+  update: async (documentId: string, payload: { title?: string | null; tag?: string | null }): Promise<DocumentWithChunks> => {
+    const slug = getSlug()
+    return apiClient.patch(`/documents/${slug}/${documentId}`, payload).then((r) => r.data)
+  },
+
   updateApproval: async (documentIds: string[], isApproved: boolean): Promise<void> => {
     const slug = getSlug()
     return apiClient.patch(`/documents/${slug}/approval?is_approved=${isApproved}`, documentIds).then((r) => r.data)

@@ -1,6 +1,6 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type Row } from '@tanstack/react-table'
-import { Trash2, Eye, Edit, CheckCircle, XCircle } from 'lucide-react'
+import { Trash2, Eye, CheckCircle, XCircle } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,7 +8,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { documentSchema } from '../data/schema'
@@ -43,12 +42,6 @@ export function DataTableRowActions<TData>({
           <Eye className='mr-2 h-4 w-4' />
           View
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate({ to: '/documents/add' })}
-        >
-          <Edit className='mr-2 h-4 w-4' />
-          Edit
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
@@ -77,9 +70,6 @@ export function DataTableRowActions<TData>({
         >
           <Trash2 className='mr-2 h-4 w-4 text-destructive' />
           Delete
-          <DropdownMenuShortcut>
-            <Trash2 size={16} />
-          </DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

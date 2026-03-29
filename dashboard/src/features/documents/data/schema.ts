@@ -21,6 +21,7 @@ export const documentSchema = z.object({
   title: z.string().nullable().optional(),
   lang: languageEnum,
   tag: z.string().nullable().optional(),
+  tag_id: z.string().uuid().nullable().optional(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 })

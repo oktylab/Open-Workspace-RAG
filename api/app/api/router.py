@@ -16,3 +16,4 @@ admin_router.include_router(admin_rating_router, prefix="/ratings", tags=["Ratin
 public_router = APIRouter()
 public_router.include_router(chat.router, prefix="/chat", tags=["Chat"])
 public_router.include_router(public_rating_router, prefix="/ratings", tags=["Ratings"])
+public_router.include_router(tags.public_router, prefix="/tags", tags=["Tags"])

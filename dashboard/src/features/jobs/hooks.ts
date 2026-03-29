@@ -106,6 +106,16 @@ export function useCreateJob() {
   })
 }
 
+export function useCreatePdfJob() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (files: File[]) => jobsApi.createPdf(files),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: JOBS_QUERY_KEY })
+    },
+  })
+}
+
 export function useUpdateJob() {
   const queryClient = useQueryClient()
   return useMutation({

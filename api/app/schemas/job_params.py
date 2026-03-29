@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Union, Literal
+from pydantic import BaseModel, Field, TypeAdapter
+from typing import Annotated, List, Optional, Union, Literal
 from app.schemas.enums import LanguageEnum
 
 #######################################################################
@@ -30,7 +30,7 @@ class CrawlingConfig(BaseModel):
     max_depth: int = Field(default=1, ge=1)
     max_pages: int = Field(default=10, ge=1)
     filters: List[FilterRule] = Field(default_factory=list)
-    
+
 class FilteringConfig(BaseModel):
     word_count_threshold: int = Field(default=30, ge=0)
     languages: Optional[List[LanguageEnum]] = Field(default=None)
@@ -46,18 +46,31 @@ class FormatingConfig(BaseModel):
 
     excluded_tags: List[str] = Field(
         default=[
-            "nav", "footer", "aside", "header", 
-            "#footer", ".footer", "#header", ".header", 
+            "nav", "footer", "aside", "header",
+            "#footer", ".footer", "#header", ".header",
             ".copyright", ".cookie-banner", "#cookie-banner",
             ".sidebar", "#sidebar", ".menu", "#menu"
         ]
     )
 
-class JobConfig(BaseModel):
+class URLJobConfig(BaseModel):
+    type: Literal["url"] = "url"
     url: str
     crawling: Optional[CrawlingConfig] = None
     filtering: FilteringConfig = Field(default_factory=FilteringConfig)
     formating: FormatingConfig = Field(default_factory=FormatingConfig)
+
+#######################################################################
+#######################################################################
+class PDFJobConfig(BaseModel):
+    type: Literal["pdf"] = "pdf"
+    storage_keys: List[str]
+    bucket: str
+
+#######################################################################
+#######################################################################
+JobConfig = Annotated[Union[URLJobConfig, PDFJobConfig], Field(discriminator="type")]
+JobConfigAdapter = TypeAdapter(JobConfig)
 
 #######################################################################
 #######################################################################
@@ -73,7 +86,26 @@ class JobSummary(BaseModel):
     failed: int = 0
     skipped: int = 0
 
-class JobResult(BaseModel):
+class URLJobResult(BaseModel):
+    type: Literal["url"] = "url"
     failed: List[JobPageResult] = Field(default_factory=list)
     skipped: List[JobPageResult] = Field(default_factory=list)
     summary: JobSummary = Field(default_factory=JobSummary)
+
+#######################################################################
+#######################################################################
+class PDFFileResult(BaseModel):
+    key: str
+    filename: str
+    pages: int
+    error: Optional[str] = None
+
+class PDFJobResult(BaseModel):
+    type: Literal["pdf"] = "pdf"
+    files: List[PDFFileResult] = Field(default_factory=list)
+    summary: JobSummary = Field(default_factory=JobSummary)
+
+#######################################################################
+#######################################################################
+JobResult = Annotated[Union[URLJobResult, PDFJobResult], Field(discriminator="type")]
+JobResultAdapter = TypeAdapter(JobResult)

@@ -1,4 +1,5 @@
 import { type TagNode } from './types'
+import type { Tag } from '@/features/tags/data/schema'
 
 export function buildTagTree(tags: string[]): TagNode[] {
   const root: TagNode[] = []
@@ -18,6 +19,7 @@ export function buildTagTree(tags: string[]): TagNode[] {
         const newNode: TagNode = {
           name: part,
           fullPath: currentPath,
+          label: part,
           children: [],
           parent: parentPath || undefined,
         }
@@ -32,6 +34,35 @@ export function buildTagTree(tags: string[]): TagNode[] {
           }
         }
       }
+    }
+  }
+
+  return root
+}
+
+export function buildTagTreeFromObjects(tags: Tag[]): TagNode[] {
+  const root: TagNode[] = []
+  const nodeMap = new Map<string, TagNode>()
+  const sorted = [...tags].sort((a, b) => a.path.localeCompare(b.path))
+
+  for (const tag of sorted) {
+    const parts = tag.path.split('.')
+    const node: TagNode = {
+      id: tag.id,
+      name: parts[parts.length - 1],
+      fullPath: tag.path,
+      label: tag.label,
+      description: tag.description,
+      children: [],
+      parent: parts.length > 1 ? parts.slice(0, -1).join('.') : undefined,
+    }
+    nodeMap.set(tag.path, node)
+    if (parts.length === 1) {
+      root.push(node)
+    } else {
+      const parent = nodeMap.get(parts.slice(0, -1).join('.'))
+      if (parent) parent.children.push(node)
+      else root.push(node)
     }
   }
 

@@ -37,7 +37,18 @@ export const jobsApi = {
 
   create: async (config: JobConfigInput): Promise<Job> => {
     const slug = getSlug()
-    return apiClient.post(`/jobs/${slug}`, config).then((r) => r.data)
+    return apiClient.post(`/jobs/${slug}/url`, config).then((r) => r.data)
+  },
+
+  createPdf: async (files: File[]): Promise<Job> => {
+    const slug = getSlug()
+    const formData = new FormData()
+    files.forEach((file) => formData.append('files', file))
+    return apiClient
+      .post(`/jobs/${slug}/pdf`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data)
   },
 
   update: async (jobId: string, config: JobConfigInput): Promise<Job> => {
@@ -52,6 +63,6 @@ export const jobsApi = {
 
   delete: async (jobIds: string[]): Promise<void> => {
     const slug = getSlug()
-    return apiClient.delete(`/jobs/${slug}?${new URLSearchParams(jobIds.map((id) => ['job_ids', id])).toString()}`).then((r) => r.data)
+    return apiClient.delete(`/jobs/${slug}`, { data: jobIds }).then((r) => r.data)
   },
 }

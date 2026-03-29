@@ -44,14 +44,4 @@ class WorkspaceResponse(BaseModel):
     api_key: str
     allowed_origins: List[str] = []
 
-    tags: List[str] = []
-    # tags_embeddings: dict = Field(default_factory=dict)
-
     model_config = ConfigDict(from_attributes=True)
-
-    @field_validator("tags", mode="before")
-    @classmethod
-    def transform_ltree_to_str(cls, v):
-        if v is None:
-            return []
-        return [str(tag) for tag in v]

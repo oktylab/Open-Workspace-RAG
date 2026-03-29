@@ -15,8 +15,8 @@ class Secrets(BaseSettings):
 
     SEAWEEDFS_HOST: str
     SEAWEEDFS_S3_PORT: int
-    # AWS_ACCESS_KEY_ID: str
-    # AWS_SECRET_ACCESS_KEY: str
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
 
     @property
     def SEAWEEDFS_S3_URL(self) -> str:

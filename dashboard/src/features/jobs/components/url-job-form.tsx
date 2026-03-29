@@ -38,9 +38,9 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import {
-  jobConfigSchema,
+  urlJobConfigSchema as jobConfigSchema,
   type FilterRule,
-  type JobConfigInput,
+  type URLJobConfig as JobConfigInput,
 } from '../data/schema'
 import { filterTypes, languages } from '../data/data'
 
@@ -52,7 +52,7 @@ const STEPS = [
 ] as const
 type StepId = (typeof STEPS)[number]['id']
 
-type JobFormProps = {
+type URLJobFormProps = {
   defaultValues?: Partial<JobConfigInput>
   onSubmit: (data: JobConfigInput) => Promise<void>
   isPending?: boolean
@@ -762,7 +762,7 @@ function FormattingStep({ form }: { form: ReturnType<typeof useForm> }) {
   )
 }
 
-export function JobForm({ defaultValues, onSubmit, isPending, isEditing = false }: JobFormProps) {
+export function URLJobForm({ defaultValues, onSubmit, isPending, isEditing = false }: URLJobFormProps) {
   const [currentStep, setCurrentStep] = useState<StepId>('source')
   const [completedSteps, setCompletedSteps] = useState<Set<StepId>>(new Set())
 

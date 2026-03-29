@@ -9,7 +9,7 @@ Python 3.12 · FastAPI · SQLAlchemy 2.0 async · Alembic · TaskIQ · pgvector 
 - `app/schemas/`: Pydantic request/response models
 - `app/repositories/`: Data access logic (use these in routers)
 - `app/api/routers/`: API endpoints (one resource group per file)
-- `app/background_tasks/`: TaskIQ task implementations
+- `app/taskiq/tasks/`: TaskIQ task implementations
 - `app/utils/`: Pure functions (no side effects, DB, or HTTP)
 
 ## Core API Standards

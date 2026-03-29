@@ -1,5 +1,5 @@
 from typing import List
-from app.schemas.job import JobConfig
+from app.schemas.job_params import URLJobConfig as JobConfig
 
 from crawl4ai import (
     AsyncWebCrawler, CrawlerRunConfig, DefaultMarkdownGenerator, 

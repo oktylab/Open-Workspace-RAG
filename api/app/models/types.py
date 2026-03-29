@@ -1,5 +1,6 @@
 from sqlalchemy.dialects import postgresql
 import sqlalchemy.types as types
+from pydantic import TypeAdapter
 
 class PydanticType(types.TypeDecorator):
     impl = postgresql.JSONB
@@ -19,6 +20,10 @@ class PydanticType(types.TypeDecorator):
     def process_result_value(self, value, dialect):
         if value is None or self.pydantic_type is None:
             return value
+        if isinstance(self.pydantic_type, TypeAdapter):
+            if isinstance(value, dict) and "type" not in value:
+                value = {"type": "url", **value}
+            return self.pydantic_type.validate_python(value)
         return self.pydantic_type.model_validate(value)
 
 

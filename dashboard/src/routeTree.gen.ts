@@ -43,7 +43,6 @@ import { Route as AuthenticatedJobsEditRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedJobsCreateRouteImport } from './routes/_authenticated/jobs/create'
 import { Route as AuthenticatedJobsJobIdRouteImport } from './routes/_authenticated/jobs/$jobId'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
-import { Route as AuthenticatedDocumentsAddRouteImport } from './routes/_authenticated/documents/add'
 import { Route as AuthenticatedDocumentsDocumentIdRouteImport } from './routes/_authenticated/documents/$documentId'
 
 const SetupRouteRoute = SetupRouteRouteImport.update({
@@ -224,12 +223,6 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDocumentsAddRoute =
-  AuthenticatedDocumentsAddRouteImport.update({
-    id: '/documents/add',
-    path: '/documents/add',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedDocumentsDocumentIdRoute =
   AuthenticatedDocumentsDocumentIdRouteImport.update({
     id: '/documents/$documentId',
@@ -252,7 +245,6 @@ export interface FileRoutesByFullPath {
   '/setup': typeof SetupSetupRoute
   '/': typeof AuthenticatedIndexRoute
   '/documents/$documentId': typeof AuthenticatedDocumentsDocumentIdRoute
-  '/documents/add': typeof AuthenticatedDocumentsAddRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/jobs/create': typeof AuthenticatedJobsCreateRoute
@@ -287,7 +279,6 @@ export interface FileRoutesByTo {
   '/setup': typeof SetupSetupRoute
   '/': typeof AuthenticatedIndexRoute
   '/documents/$documentId': typeof AuthenticatedDocumentsDocumentIdRoute
-  '/documents/add': typeof AuthenticatedDocumentsAddRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/jobs/create': typeof AuthenticatedJobsCreateRoute
@@ -326,7 +317,6 @@ export interface FileRoutesById {
   '/_setup/setup': typeof SetupSetupRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/documents/$documentId': typeof AuthenticatedDocumentsDocumentIdRoute
-  '/_authenticated/documents/add': typeof AuthenticatedDocumentsAddRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/_authenticated/jobs/create': typeof AuthenticatedJobsCreateRoute
@@ -364,7 +354,6 @@ export interface FileRouteTypes {
     | '/setup'
     | '/'
     | '/documents/$documentId'
-    | '/documents/add'
     | '/errors/$error'
     | '/jobs/$jobId'
     | '/jobs/create'
@@ -399,7 +388,6 @@ export interface FileRouteTypes {
     | '/setup'
     | '/'
     | '/documents/$documentId'
-    | '/documents/add'
     | '/errors/$error'
     | '/jobs/$jobId'
     | '/jobs/create'
@@ -437,7 +425,6 @@ export interface FileRouteTypes {
     | '/_setup/setup'
     | '/_authenticated/'
     | '/_authenticated/documents/$documentId'
-    | '/_authenticated/documents/add'
     | '/_authenticated/errors/$error'
     | '/_authenticated/jobs/$jobId'
     | '/_authenticated/jobs/create'
@@ -714,13 +701,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/documents/add': {
-      id: '/_authenticated/documents/add'
-      path: '/documents/add'
-      fullPath: '/documents/add'
-      preLoaderRoute: typeof AuthenticatedDocumentsAddRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/documents/$documentId': {
       id: '/_authenticated/documents/$documentId'
       path: '/documents/$documentId'
@@ -760,7 +740,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDocumentsDocumentIdRoute: typeof AuthenticatedDocumentsDocumentIdRoute
-  AuthenticatedDocumentsAddRoute: typeof AuthenticatedDocumentsAddRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedJobsJobIdRoute: typeof AuthenticatedJobsJobIdRoute
   AuthenticatedJobsCreateRoute: typeof AuthenticatedJobsCreateRoute
@@ -780,7 +759,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedDocumentsDocumentIdRoute: AuthenticatedDocumentsDocumentIdRoute,
-  AuthenticatedDocumentsAddRoute: AuthenticatedDocumentsAddRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedJobsJobIdRoute: AuthenticatedJobsJobIdRoute,
   AuthenticatedJobsCreateRoute: AuthenticatedJobsCreateRoute,

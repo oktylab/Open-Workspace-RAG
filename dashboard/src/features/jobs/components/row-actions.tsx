@@ -26,7 +26,7 @@ export function JobsRowActions({ row }: JobsRowActionsProps) {
   const navigate = useNavigate()
   const runJobs = useRunJobs()
 
-  const canEdit = job.status !== 'STARTED' && job.status !== 'PENDING'
+  const canEdit = job.status !== 'STARTED' && job.status !== 'PENDING' && job.config?.type !== 'pdf'
   const canRun = job.status === 'FAILURE' || job.status === 'SUCCESS'
 
   const handleRun = (e: React.MouseEvent) => {

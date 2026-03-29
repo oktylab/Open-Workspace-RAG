@@ -4,6 +4,7 @@ import {
   Settings,
   FileText,
   ListTodo,
+  Tag,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -27,11 +28,11 @@ export const sidebarData: SidebarData = {
           url: '/documents',
           icon: FileText,
         },
-        // {
-        //   title: 'Tags',
-        //   url: '/tags',
-        //   icon: Tag,
-        // },
+        {
+          title: 'Tags',
+          url: '/tags',
+          icon: Tag,
+        },
         // {
         //   title: 'Tasks',
         //   url: '/tasks',

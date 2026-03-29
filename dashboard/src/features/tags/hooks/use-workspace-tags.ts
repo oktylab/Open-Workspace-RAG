@@ -1,42 +1,41 @@
-import { useMemo } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCurrentWorkspace, WORKSPACES_QUERY_KEY } from '@/features/auth/hooks'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { tagsApi } from '../api'
+import type { TagCreate, TagUpdate } from '../data/schema'
+
+export const TAGS_QUERY_KEY = ['tags'] as const
 
 export function useWorkspaceTags() {
   const queryClient = useQueryClient()
-  const { workspace, isLoading } = useCurrentWorkspace()
 
-  const tags = useMemo(() => workspace?.tags ?? [], [workspace])
-  
+  const query = useQuery({
+    queryKey: TAGS_QUERY_KEY,
+    queryFn: tagsApi.list,
+  })
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: TAGS_QUERY_KEY })
 
   const addTag = useMutation({
-    mutationFn: (path: string) => tagsApi.add(path),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: WORKSPACES_QUERY_KEY })
-    },
+    mutationFn: (payload: TagCreate) => tagsApi.add(payload),
+    onSuccess: invalidate,
+  })
+
+  const updateTag = useMutation({
+    mutationFn: ({ path, payload }: { path: string; payload: TagUpdate }) =>
+      tagsApi.update(path, payload),
+    onSuccess: invalidate,
   })
 
   const deleteTag = useMutation({
     mutationFn: (path: string) => tagsApi.delete(path),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: WORKSPACES_QUERY_KEY })
-    },
-  })
-
-  const renameTag = useMutation({
-    mutationFn: ({ oldPath, newPath }: { oldPath: string; newPath: string }) =>
-      tagsApi.rename(oldPath, newPath),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: WORKSPACES_QUERY_KEY })
-    },
+    onSuccess: invalidate,
   })
 
   return {
-    tags,
-    isLoading,
+    tags: query.data ?? [],
+    isLoading: query.isLoading,
     addTag,
+    updateTag,
     deleteTag,
-    renameTag,
   }
 }

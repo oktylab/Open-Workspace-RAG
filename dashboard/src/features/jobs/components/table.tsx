@@ -82,10 +82,16 @@ export function JobsTable({ data, total }: JobsTableProps) {
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     globalFilterFn: (row, _columnId, filterValue) => {
+      const search = String(filterValue).toLowerCase()
       const id = String(row.getValue('id')).toLowerCase()
-      const url = String(row.original.config?.url ?? '').toLowerCase()
-      const searchValue = String(filterValue).toLowerCase()
-      return id.includes(searchValue) || url.includes(searchValue)
+      const config = row.original.config
+      const source =
+        config?.type === 'url'
+          ? config.url.toLowerCase()
+          : config?.type === 'pdf'
+            ? config.storage_keys.join(' ').toLowerCase()
+            : ''
+      return id.includes(search) || source.includes(search)
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -112,7 +118,7 @@ export function JobsTable({ data, total }: JobsTableProps) {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter by URL or ID...'
+        searchPlaceholder='Filter by ID, URL or filename...'
         filters={[
           {
             columnId: 'status',
