@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     # OLLAMA_LLM_MODEL: str = "mistral:latest"
     OLLAMA_EMBEDDING_MODEL: str = "bge-m3"
 
+    # ── Groq (LLM) ────────────────────────────────────────────────────────────
+    GROQ_LLM_MODEL: str = "llama-3.1-8b-instant"
+
+    # ── Mistral (embeddings) ──────────────────────────────────────────────────
+    MISTRAL_EMBEDDING_MODEL: str = "mistral-embed"
+
     # ── Storage ───────────────────────────────────────────────────────────────
     FILES_BUCKET: str = "files"
 

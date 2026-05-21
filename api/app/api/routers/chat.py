@@ -69,7 +69,10 @@ async def prepare_rag_data(
     )
 
     if not db_documents:
-        return None, None
+        if not session_turns:
+            return None, None
+        db_documents = []
+        scores = {}
 
     db_chunks = [c for d in db_documents for c in d.chunks]
     db_chunks.sort(key=lambda c: scores.get(c.id, 0.0), reverse=True)

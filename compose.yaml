@@ -42,18 +42,18 @@ services:
 
   ########################################################################################
   ########################################################################################
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    volumes:
-      - ollama_data:/root/.ollama
-    ports:
-      - "11434:11434"
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   ports:
+  #     - "11434:11434"
+  #   healthcheck:
+  #     test: ["CMD", "ollama", "list"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
 
   ########################################################################################
   ########################################################################################
@@ -71,8 +71,8 @@ services:
     depends_on:
       db:
         condition: service_started
-      ollama:
-        condition: service_healthy
+      # ollama:
+      #   condition: service_healthy
       redis:
         condition: service_started
 
@@ -104,9 +104,9 @@ services:
     env_file: .env
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - OLLAMA_HOST=http://ollama:11434
+      # - OLLAMA_HOST=http://ollama:11434
       - PYTHONDONTWRITEBYTECODE=1
-      - WATCHFILES_FORCE_POLLING=1 
+      - WATCHFILES_FORCE_POLLING=1
     volumes:
       - ./api:/code
     depends_on:
@@ -166,7 +166,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  ollama_data:
+  # ollama_data:
   redis_insight_data:
   seaweedfs_data:
   # open_webui_data:

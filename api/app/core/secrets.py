@@ -18,6 +18,9 @@ class Secrets(BaseSettings):
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str
 
+    GROQ_API_KEY: str
+    MISTRAL_API_KEY: str
+
     @property
     def SEAWEEDFS_S3_URL(self) -> str:
         return f"http://{self.SEAWEEDFS_HOST}:{self.SEAWEEDFS_S3_PORT}"
